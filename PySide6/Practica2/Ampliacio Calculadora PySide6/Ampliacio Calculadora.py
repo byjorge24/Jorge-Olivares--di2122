@@ -3,7 +3,7 @@ import os
 from PySide6.QtCore import Qt
 from PySide6.QtGui import QAction, QIcon, QKeySequence
 from PySide6.QtWidgets import (
-    QApplication, QGridLayout, QLabel, QLineEdit,
+    QApplication, QGridLayout, QHBoxLayout, QLabel, QLineEdit,
     QMainWindow, QStatusBar, QVBoxLayout, QWidget,
     QPushButton)
 
@@ -69,6 +69,37 @@ class AnotherWindow(QWidget):
             "Shift++ -> *"
         )
         layoutV2.addWidget(self.label2)
+
+
+class AnotherWindow2(QWidget):
+
+    def __init__(self):
+        super().__init__()
+        self.layoutH = QHBoxLayout()
+        self.layoutV = QVBoxLayout()
+        self.setWindowTitle("Help")
+        self.setLayout(self.layoutV)
+        self.label = QLabel(
+            "Are you sure you want to exit?"
+        )
+        self.buttonSi = QPushButton("Yes")
+        self.buttonSi.setStatusTip("Yes")
+        self.buttonSi.clicked.connect(self.closeApp2)
+
+        self.buttonNo = QPushButton("No")
+        self.buttonNo.setStatusTip("No")
+        self.buttonNo.clicked.connect(self.closeApp3)
+
+        self.layoutV.addWidget(self.label)
+        self.layoutV.addLayout(self.layoutH)
+        self.layoutH.addWidget(self.buttonSi)
+        self.layoutH.addWidget(self.buttonNo)
+
+    def closeApp2(self):
+        app.closeAllWindows()
+
+    def closeApp3(self):
+        self.close()
 
 
 class MainWindow(QMainWindow):
@@ -224,6 +255,7 @@ class MainWindow(QMainWindow):
         self.simpleCalculator()
 
         self.window1 = AnotherWindow()
+        self.window2 = AnotherWindow2()
 
     # Funcion que realiza las operaciones y nos las muestra por pantalla.
     def op(self):
@@ -360,6 +392,31 @@ class MainWindow(QMainWindow):
                                         pos[0], pos[1]
                                         )
             self.button.clicked.connect(self.op)
+            self.button.setStatusTip(buttonText1)
+
+            """
+                Asignamos el status de los atajos de teclado
+                para que el usuario sepa en todo momento,
+                cuales son los atajos a utilizar
+            """
+            if(buttonText1 == 'AC'):
+                self.button.setStatusTip(
+                    ('c'))
+            elif(buttonText1 == '<-'):
+                self.button.setStatusTip(
+                    ('Backspace'))
+            elif(buttonText1 == "%"):
+                self.button.setStatusTip(
+                    ('Shift+5'))
+            elif(buttonText1 == "/"):
+                self.button.setStatusTip(
+                    ('Shift+7'))
+            elif(buttonText1 == "x"):
+                self.button.setStatusTip(
+                    ('Shift++'))
+            elif(buttonText1 == "()"):
+                self.button.setStatusTip(
+                    ('Shift+8'))
 
             """
                 Asignamos los atajos de teclado para poder utilizar el teclado
@@ -419,6 +476,35 @@ class MainWindow(QMainWindow):
                                         pos2[0], pos2[1]
                                         )
             self.button2.clicked.connect(self.op)
+            self.button2.setStatusTip(buttonText2)
+
+            if(buttonText2 == 'AC'):
+                self.button2.setStatusTip(
+                    ('c'))
+            elif(buttonText2 == '<-'):
+                self.button2.setStatusTip(
+                    ('Backspace'))
+            elif(buttonText2 == "%"):
+                self.button2.setStatusTip(
+                    ('Shift+5'))
+            elif(buttonText2 == "/"):
+                self.button2.setStatusTip(
+                    ('Shift+7'))
+            elif(buttonText2 == "x"):
+                self.button2.setStatusTip(
+                    ('Shift++'))
+            elif(buttonText2 == "()"):
+                self.button2.setStatusTip(
+                    ('Shift+8'))
+            elif(buttonText2 == "^"):
+                self.button2.setStatusTip(
+                    ('Shift+9'))
+            elif(buttonText2 == "√"):
+                self.button2.setStatusTip(
+                    ('Shift+4'))
+            elif(buttonText2 == "π"):
+                self.button2.setStatusTip(
+                    ('Shift+6'))
 
             """
                 Asignamos los atajos de teclado para poder utilizar el teclado
@@ -471,7 +557,7 @@ class MainWindow(QMainWindow):
         La utilizamos cuando pulsamos el boton del menú "Exit"
     """
     def closeApp(self):
-        app.closeAllWindows()
+        self.window2.show()
 
 
 app = QApplication([])

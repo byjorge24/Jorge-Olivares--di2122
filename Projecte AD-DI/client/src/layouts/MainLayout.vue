@@ -21,7 +21,7 @@
 
     <q-drawer
       v-model="leftDrawerOpen"
-      show-if-above
+      show-if-above="false"
       bordered
     >
       <q-list>
@@ -46,13 +46,13 @@ const linksList = [
   {
     title: 'Login',
     caption: '',
-    icon: 'school',
-    to: '/#'
+    icon: 'login',
+    to: '/'
   },
   {
     title: 'About',
     caption: '',
-    icon: 'school',
+    icon: 'info',
     to: '/about'
   }
 ]

@@ -8,8 +8,8 @@
         <q-card square bordered class="q-pa-lg shadow-1">
           <q-card-section>
             <q-form class="q-gutter-md">
-              <q-input square filled clearable v-model="email" type="email" label="Username" />
-              <q-input square filled clearable v-model="password" type="password" label="Password" />
+              <q-input square filled clearable v-model="nombre" type="text" label="Username" :rules="[val => !!val || 'Username is missing']"/>
+              <q-input square filled clearable v-model="password" type="password" label="Password" :rules="[val => !!val || 'Password is missing']"/>
             </q-form>
           </q-card-section>
           <q-card-actions class="q-px-md">
@@ -29,7 +29,7 @@ export default {
   name: 'Login',
   data () {
     return {
-      email: '',
+      nombre: '',
       password: ''
     }
   }

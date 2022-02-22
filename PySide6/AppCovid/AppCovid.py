@@ -17,6 +17,9 @@ from sqlite3 import Error
 from PySide6.QtCharts import (QBarSet, QChart, QChartView,
                               QStackedBarSeries, QBarCategoryAxis,
                               QLineSeries)
+from PySide6.QtWebEngineCore import QWebEnginePage
+from PySide6.QtWebEngineWidgets import QWebEngineView
+from PySide6.QtCore import QUrl
 
 ''' Carpeta donde alojaremos la ruta,
     para poder crear la base de datos,
@@ -36,6 +39,59 @@ try:
     print("Connected to SQLite")
 except Error as error:
     print("Failed to connect", error)
+
+
+class WebWindow(QMainWindow):
+
+    def __init__(self):
+        super().__init__()
+
+        self.setWindowTitle('Web Covid GVA')
+
+        self.setFixedHeight(900)
+        self.setFixedWidth(1600)
+
+        self.toolBar = QToolBar()
+        self.addToolBar(self.toolBar)
+
+        self.iconoExit = os.path.join(carpeta, "recursos/exit.png")
+
+        self.exit_button = QAction(QIcon(self.iconoExit), "&Close", self)
+        self.exit_button.setStatusTip("This is your Exit Button")
+        self.exit_button.triggered.connect(self.closeWeb)
+
+        self.toolBar.addAction(self.exit_button)
+
+        self.toolBar.setMovable(False)
+
+        self.addressLineEdit = QLineEdit()
+        self.addressLineEdit.returnPressed.connect(self.load)
+
+        self.webEngineView = QWebEngineView()
+        self.setCentralWidget(self.webEngineView)
+        initialUrl = 'https://coronavirus.san.gva.es/es/estadisticas'
+        self.addressLineEdit.setText(initialUrl)
+        self.webEngineView.load(QUrl(initialUrl))
+        self.webEngineView.page().titleChanged.connect(self.setWindowTitle)
+        self.webEngineView.page().urlChanged.connect(self.urlChanged)
+
+    def closeWeb(self):
+        self.close()
+        main_window.show()
+
+    def load(self):
+        url = QUrl.fromUserInput(self.addressLineEdit.text())
+        if url.isValid():
+            self.webEngineView.load(url)
+
+    def back(self):
+        self.webEngineView.page().triggerAction(QWebEnginePage.Back)
+
+    def forward(self):
+        self.webEngineView.page().triggerAction(QWebEnginePage.Forward)
+
+    def urlChanged(self, url):
+        self.addressLineEdit.setText(url.toString())
 
 
 ''' Definimos la ventana de Error,
@@ -514,15 +570,31 @@ class MainWindow(QMainWindow):
         self.file_menu.addAction(self.logout_button)
         self.file_menu.addAction(self.exit_button)
 
+        self.file_menu2 = self.menu.addMenu("&Web")
+
+        self.webIcon = os.path.join(carpeta, "recursos/web.png")
+
+        self.web_button = QAction(QIcon(self.webIcon), "&Web", self)
+        self.web_button.setStatusTip("This is your Web Button")
+        self.web_button.triggered.connect(self.webShow)
+
+        self.file_menu2.addAction(self.web_button)
+
         ''' Fijamos el layout vertical al widget principal'''
         self.widget.setLayout(self.layoutV)
 
         ''' Fijamos a la ventana el widget principal '''
         self.setCentralWidget(self.widget)
 
+    def webShow(self):
+        self.close()
+        webWindow.show()
+
     ''' Funcion que cambia los datos del grafico y del label,
         cuando pulsamos el boton '''
     def buscarPcr(self):
+
+        self.graphWidget.close()
 
         with open(
             carpeta + '/recursos/data/covid/03a30/' +
@@ -551,9 +623,16 @@ class MainWindow(QMainWindow):
 
         self.layoutH2.addWidget(self.label)
 
+        self.graphWidget.setFixedHeight(300)
+        self.graphWidget.setFixedWidth(900)
+        self.label2.setFixedHeight(400)
+        self.label2.setFixedWidth(600)
+
     ''' Funcion que cambia los datos del grafico y del label,
         cuando pulsamos el boton '''
     def buscarPcrAcumulada(self):
+
+        self.graphWidget.close()
 
         with open(
             carpeta + '/recursos/data/covid/03a30/' +
@@ -582,9 +661,16 @@ class MainWindow(QMainWindow):
 
         self.layoutH2.addWidget(self.label)
 
+        self.graphWidget.setFixedHeight(300)
+        self.graphWidget.setFixedWidth(900)
+        self.label2.setFixedHeight(400)
+        self.label2.setFixedWidth(600)
+
     ''' Funcion que cambia los datos del grafico y del label,
         cuando pulsamos el boton '''
     def buscarActivos(self):
+
+        self.graphWidget.close()
 
         with open(
             carpeta + '/recursos/data/covid/03a30/' +
@@ -613,9 +699,16 @@ class MainWindow(QMainWindow):
 
         self.layoutH2.addWidget(self.label)
 
+        self.graphWidget.setFixedHeight(300)
+        self.graphWidget.setFixedWidth(900)
+        self.label2.setFixedHeight(400)
+        self.label2.setFixedWidth(600)
+
     ''' Funcion que cambia los datos del grafico y del label,
         cuando pulsamos el boton '''
     def buscarActivosAcumulados(self):
+
+        self.graphWidget.close()
 
         with open(
             carpeta + '/recursos/data/covid/03a30/' +
@@ -645,9 +738,16 @@ class MainWindow(QMainWindow):
 
         self.layoutH2.addWidget(self.label)
 
+        self.graphWidget.setFixedHeight(300)
+        self.graphWidget.setFixedWidth(900)
+        self.label2.setFixedHeight(400)
+        self.label2.setFixedWidth(600)
+
     ''' Funcion que cambia los datos del grafico y del label,
         cuando pulsamos el boton '''
     def buscarFallecidos(self):
+
+        self.graphWidget.close()
 
         with open(
             carpeta + '/recursos/data/covid/03a30/' +
@@ -675,6 +775,11 @@ class MainWindow(QMainWindow):
         self.layoutH2.addWidget(self.graphWidget)
 
         self.layoutH2.addWidget(self.label)
+
+        self.graphWidget.setFixedHeight(300)
+        self.graphWidget.setFixedWidth(900)
+        self.label2.setFixedHeight(400)
+        self.label2.setFixedWidth(600)
 
     ''' Creamos grafico de barras y lo rellenamos con los datos del CSV '''
     def create_bar_chart(self):
@@ -714,6 +819,8 @@ class MainWindow(QMainWindow):
         self._bar_series.append(self.set5)
 
         self.chart = QChart()
+        self.chart.setAnimationOptions(QChart.AllAnimations)
+        self.chart.setTheme(QChart.ChartThemeDark)
         self.chart.addSeries(self._bar_series)
         self.chart.setTitle("Total")
 
@@ -726,6 +833,11 @@ class MainWindow(QMainWindow):
 
         axisX = QBarCategoryAxis()
         axisX.append(self.categories)
+
+        self.graphWidget.setFixedHeight(300)
+        self.graphWidget.setFixedWidth(900)
+        self.label2.setFixedHeight(400)
+        self.label2.setFixedWidth(600)
 
         return self.chart
 
@@ -846,6 +958,8 @@ class MainWindow(QMainWindow):
                 self.series.append(QPointF(31.0, float(pcr)))
 
             self.chart = QChart()
+            self.chart.setAnimationOptions(QChart.AllAnimations)
+            self.chart.setTheme(QChart.ChartThemeBlueNcs)
             self.chart.legend().hide()
             self.chart.addSeries(self.series)
             self.chart.createDefaultAxes()
@@ -893,10 +1007,17 @@ class MainWindow(QMainWindow):
                 self.series.append(QPointF(31.0, float(pcr)))
 
             self.chart = QChart()
+            self.chart.setAnimationOptions(QChart.AllAnimations)
+            self.chart.setTheme(QChart.ChartThemeBlueNcs)
             self.chart.legend().hide()
             self.chart.addSeries(self.series)
             self.chart.createDefaultAxes()
             self.chart.setTitle("PCR+")
+
+        self.graphWidget.setFixedHeight(300)
+        self.graphWidget.setFixedWidth(900)
+        self.label2.setFixedHeight(400)
+        self.label2.setFixedWidth(600)
 
         return self.chart
 
@@ -1018,6 +1139,8 @@ class MainWindow(QMainWindow):
                 self.series.append(QPointF(31.0, float(pcrAcumulada)))
 
             self.chart = QChart()
+            self.chart.setAnimationOptions(QChart.AllAnimations)
+            self.chart.setTheme(QChart.ChartThemeBlueCerulean)
             self.chart.legend().hide()
             self.chart.addSeries(self.series)
             self.chart.createDefaultAxes()
@@ -1065,10 +1188,17 @@ class MainWindow(QMainWindow):
                 self.series.append(QPointF(31.0, float(pcrAcumulada)))
 
             self.chart = QChart()
+            self.chart.setAnimationOptions(QChart.AllAnimations)
+            self.chart.setTheme(QChart.ChartThemeBlueCerulean)
             self.chart.legend().hide()
             self.chart.addSeries(self.series)
             self.chart.createDefaultAxes()
             self.chart.setTitle("PCR+ Acumuladas")
+
+        self.graphWidget.setFixedHeight(300)
+        self.graphWidget.setFixedWidth(900)
+        self.label2.setFixedHeight(400)
+        self.label2.setFixedWidth(600)
 
         return self.chart
 
@@ -1190,6 +1320,8 @@ class MainWindow(QMainWindow):
                 self.series.append(QPointF(31.0, float(activos)))
 
             self.chart = QChart()
+            self.chart.setAnimationOptions(QChart.AllAnimations)
+            self.chart.setTheme(QChart.ChartThemeBrownSand)
             self.chart.legend().hide()
             self.chart.addSeries(self.series)
             self.chart.createDefaultAxes()
@@ -1237,10 +1369,17 @@ class MainWindow(QMainWindow):
                 self.series.append(QPointF(31.0, float(activos)))
 
             self.chart = QChart()
+            self.chart.setAnimationOptions(QChart.AllAnimations)
+            self.chart.setTheme(QChart.ChartThemeBrownSand)
             self.chart.legend().hide()
             self.chart.addSeries(self.series)
             self.chart.createDefaultAxes()
             self.chart.setTitle("Activos")
+
+        self.graphWidget.setFixedHeight(300)
+        self.graphWidget.setFixedWidth(900)
+        self.label2.setFixedHeight(400)
+        self.label2.setFixedWidth(600)
 
         return self.chart
 
@@ -1362,6 +1501,8 @@ class MainWindow(QMainWindow):
                 self.series.append(QPointF(31.0, float(activosAcumulados)))
 
             self.chart = QChart()
+            self.chart.setAnimationOptions(QChart.AllAnimations)
+            self.chart.setTheme(QChart.ChartThemeHighContrast)
             self.chart.legend().hide()
             self.chart.addSeries(self.series)
             self.chart.createDefaultAxes()
@@ -1409,10 +1550,17 @@ class MainWindow(QMainWindow):
                 self.series.append(QPointF(31.0, float(activosAcumulados)))
 
             self.chart = QChart()
+            self.chart.setAnimationOptions(QChart.AllAnimations)
+            self.chart.setTheme(QChart.ChartThemeHighContrast)
             self.chart.legend().hide()
             self.chart.addSeries(self.series)
             self.chart.createDefaultAxes()
             self.chart.setTitle("Activos Acumulados")
+
+        self.graphWidget.setFixedHeight(300)
+        self.graphWidget.setFixedWidth(900)
+        self.label2.setFixedHeight(400)
+        self.label2.setFixedWidth(600)
 
         return self.chart
 
@@ -1534,6 +1682,8 @@ class MainWindow(QMainWindow):
                 self.series.append(QPointF(31.0, float(fallecidos)))
 
             self.chart = QChart()
+            self.chart.setAnimationOptions(QChart.AllAnimations)
+            self.chart.setTheme(QChart.ChartThemeDark)
             self.chart.legend().hide()
             self.chart.addSeries(self.series)
             self.chart.createDefaultAxes()
@@ -1581,10 +1731,17 @@ class MainWindow(QMainWindow):
                 self.series.append(QPointF(31.0, float(fallecidos)))
 
             self.chart = QChart()
+            self.chart.setAnimationOptions(QChart.AllAnimations)
+            self.chart.setTheme(QChart.ChartThemeDark)
             self.chart.legend().hide()
             self.chart.addSeries(self.series)
             self.chart.createDefaultAxes()
             self.chart.setTitle("Fallecidos")
+
+        self.graphWidget.setFixedHeight(300)
+        self.graphWidget.setFixedWidth(900)
+        self.label2.setFixedHeight(400)
+        self.label2.setFixedWidth(600)
 
         return self.chart
 
@@ -1659,6 +1816,11 @@ class MainWindow(QMainWindow):
 
         self.layoutH2.addWidget(self.label)
 
+        self.graphWidget.setFixedHeight(300)
+        self.graphWidget.setFixedWidth(900)
+        self.label2.setFixedHeight(400)
+        self.label2.setFixedWidth(600)
+
     ''' Funcion que cambia los datos, cuando pulsamos el boton del toolbar '''
     def cambiarApcr(self):
 
@@ -1706,6 +1868,11 @@ class MainWindow(QMainWindow):
         self.layoutH2.addWidget(self.label)
 
         self.buttonPcr.clicked.connect(self.buscarPcr)
+
+        self.graphWidget.setFixedHeight(300)
+        self.graphWidget.setFixedWidth(900)
+        self.label2.setFixedHeight(400)
+        self.label2.setFixedWidth(600)
 
     ''' Funcion que cambia los datos, cuando pulsamos el boton del toolbar '''
     def cambiarApcracumulada(self):
@@ -1755,6 +1922,11 @@ class MainWindow(QMainWindow):
 
         self.buttonPcrAcumulada.clicked.connect(self.buscarPcrAcumulada)
 
+        self.graphWidget.setFixedHeight(300)
+        self.graphWidget.setFixedWidth(900)
+        self.label2.setFixedHeight(400)
+        self.label2.setFixedWidth(600)
+
     ''' Funcion que cambia los datos, cuando pulsamos el boton del toolbar '''
     def cambiarAactivos(self):
 
@@ -1800,6 +1972,11 @@ class MainWindow(QMainWindow):
         self.layoutH2.addWidget(self.label)
 
         self.buttonActivos.clicked.connect(self.buscarActivos)
+
+        self.graphWidget.setFixedHeight(300)
+        self.graphWidget.setFixedWidth(900)
+        self.label2.setFixedHeight(400)
+        self.label2.setFixedWidth(600)
 
     ''' Funcion que cambia los datos, cuando pulsamos el boton del toolbar '''
     def cambiarAactivosacumulados(self):
@@ -1850,6 +2027,11 @@ class MainWindow(QMainWindow):
         self.buttonActivosAcumulados.clicked.connect(
             self.buscarActivosAcumulados)
 
+        self.graphWidget.setFixedHeight(300)
+        self.graphWidget.setFixedWidth(900)
+        self.label2.setFixedHeight(400)
+        self.label2.setFixedWidth(600)
+
     ''' Funcion que cambia los datos, cuando pulsamos el boton del toolbar '''
     def cambiarAfallecidos(self):
 
@@ -1896,9 +2078,15 @@ class MainWindow(QMainWindow):
 
         self.buttonFallecidos.clicked.connect(self.buscarFallecidos)
 
+        self.graphWidget.setFixedHeight(300)
+        self.graphWidget.setFixedWidth(900)
+        self.label2.setFixedHeight(400)
+        self.label2.setFixedWidth(600)
+
 
 app = QApplication([])
 login_window = LoginWindow()
+webWindow = WebWindow()
 main_window = MainWindow()
 login_window.show()
 app.exec()
